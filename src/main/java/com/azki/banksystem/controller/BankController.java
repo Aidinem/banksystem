@@ -1,23 +1,28 @@
+/*
 package com.azki.banksystem.controller;
 
+import com.azki.banksystem.model.BankAccount;
 import com.azki.banksystem.service.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/banksystem")
 public class BankController {
 
     @Autowired
     BankService bankService;
 
-    @RequestMapping("/createAccount")
-    public void createAccount(String accountHolderName,Double initialBalance){
-        try {
-            bankService.createAccount(accountHolderName,initialBalance);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+    @PostMapping("/createAccount")
+    public void createAccount(@RequestBody BankAccount bankAccount) throws Exception {
+            bankService.createAccount(bankAccount);
+    }
+
+    @GetMapping("/{accountNumber}")
+    public ResponseEntity<BankAccount> displayAccountInfo(@PathVariable String accountNumber) throws Exception {
+            BankAccount bankAccount = bankService.findByAccountNumber(accountNumber);
+            return ResponseEntity.ok(bankAccount);
     }
 }
+*/

@@ -1,9 +1,6 @@
 package com.azki.banksystem.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,8 +13,13 @@ public class BankAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "sequence")
     private String accountNumber;
     private String accountHolderName;
-    private double balance;
+    @Column(nullable = false)
+    private Double balance;
+
+    public BankAccount(String accountHolderName, Double balance) {
+        this.accountHolderName = accountHolderName;
+        this.balance = balance;
+    }
 }
