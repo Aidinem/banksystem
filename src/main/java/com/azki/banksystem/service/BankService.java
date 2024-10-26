@@ -12,4 +12,6 @@ public interface BankService {
 
     public void withdraw(String accountNumber, Double amount) throws Exception;
 
+    public void transfer(String fromAccountNumber,String toAccountNumber,Double amount) throws Exception;;
+
 }

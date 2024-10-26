@@ -15,8 +15,8 @@ public class BankSystemConsoleUI implements CommandLineRunner {
 
     @Autowired
     private BankService bankService;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
-    private final Scanner scanner = new Scanner(System.in);
+    ExecutorService executorService = Executors.newFixedThreadPool(10);
+    Scanner scanner = new Scanner(System.in);
 
 
     @Override
@@ -34,7 +34,7 @@ public class BankSystemConsoleUI implements CommandLineRunner {
         System.out.println("2. Deposit");
         System.out.println("3. Withdraw");
         System.out.println("4. Transfer");
-        System.out.println("5. Check Balance");
+        System.out.println("5. Display Account Information");
         System.out.println("6. Exit");
         System.out.println("Choose an option: ");
     }
@@ -45,16 +45,17 @@ public class BankSystemConsoleUI implements CommandLineRunner {
             case 2 -> deposit();
             case 3 -> withdraw();
             case 4 -> transfer();
-            case 5 -> checkBalance();
+            case 5 -> displayAccountIfo();
             case 6 -> System.out.println("Exiting the Banking System. Goodbye!");
             default -> System.out.println("Invalid option. Please try again.");
         }
     }
 
     private void createAccount() {
-        System.out.print("Enter account holder name: ");
+        scanner = new Scanner(System.in);
+        System.out.println("Enter account holder name: ");
         String holderName = scanner.nextLine();
-        System.out.print("Enter initial balance: ");
+        System.out.println("Enter initial balance: ");
         Double initialBalance = scanner.nextDouble();
         BankAccount bankAccount = new BankAccount(holderName,initialBalance);
         executorService.submit(() -> {
@@ -63,33 +64,48 @@ public class BankSystemConsoleUI implements CommandLineRunner {
                 account = bankService.createAccount(bankAccount);
                 System.out.println("Account created successfully! Account Number: " + account.getAccountNumber());
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
 
     }
 
-    private void deposit() throws Exception {
-        System.out.print("Enter account number: ");
+    private void deposit()  {
+        scanner = new Scanner(System.in);
+        System.out.println("Enter account number: ");
         String accountNumber = scanner.nextLine();
-        System.out.print("Enter amount to deposit: ");
+        System.out.println("Enter amount to deposit: ");
         Double amount = scanner.nextDouble();
 
-        bankService.deposit(accountNumber, amount);
-        System.out.println("Deposit successful!");
+        executorService.submit(() -> {
+            try {
+                bankService.deposit(accountNumber, amount);
+                System.out.println("Deposit successful!");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private void withdraw() throws Exception {
+        scanner = new Scanner(System.in);
         System.out.print("Enter account number: ");
         String accountNumber = scanner.nextLine();
         System.out.print("Enter amount to withdraw: ");
         Double amount = scanner.nextDouble();
 
-        bankService.withdraw(accountNumber, amount);
-        System.out.println("Withdrawal successful!");
+        executorService.submit(() -> {
+            try {
+                bankService.withdraw(accountNumber, amount);
+                System.out.println("Withdrawal successful!");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    private void transfer() {
+    private void transfer() throws Exception {
+        scanner = new Scanner(System.in);
         System.out.print("Enter sender's account number: ");
         String fromAccount = scanner.nextLine();
         System.out.print("Enter receiver's account number: ");
@@ -97,11 +113,12 @@ public class BankSystemConsoleUI implements CommandLineRunner {
         System.out.print("Enter amount to transfer: ");
         Double amount = scanner.nextDouble();
 
-/*        bank.transfer(fromAccount, toAccount, amount);
-        System.out.println("Transfer successful!");*/
+        bankService.transfer(fromAccount, toAccount, amount);
+        System.out.println("Transfer successful!");
     }
 
-    private void checkBalance() throws Exception {
+    private void displayAccountIfo() throws Exception {
+        scanner = new Scanner(System.in);
         System.out.print("Enter account number: ");
         String accountNumber = scanner.nextLine();
 

@@ -11,7 +11,7 @@ public class TransactionLoggerImpl implements TransactionLogger {
     private final Logger logger = LoggerFactory.getLogger(TransactionLoggerImpl.class);
 
     @Override
-    public void onTransaction(String accountNumber, String transactionType, double amount) {
+    public void onTransaction(String accountNumber, String transactionType, Double amount) {
         logger.info("Transaction: {} {} {} {}", accountNumber, transactionType, amount, LocalDateTime.now());
     }
 }

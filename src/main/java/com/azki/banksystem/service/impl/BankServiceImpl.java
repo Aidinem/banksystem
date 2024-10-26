@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.rmi.ServerException;
 import java.util.Random;
 
 @Service
@@ -16,6 +15,7 @@ public class BankServiceImpl implements BankService {
 
     @Autowired
     BankAccountRepository bankAccountRepository;
+    @Autowired
     TransactionLogger transactionLogger;
 
 
@@ -26,7 +26,7 @@ public class BankServiceImpl implements BankService {
         account.setAccountHolderName(bankAccount.getAccountHolderName());
         account.setAccountNumber(generateAccountNumber());
         if(bankAccount.getBalance() == 0 || bankAccount.getBalance() < 0)
-            throw new ServerException("The initial balance value must be greater than zero.");
+            throw new Exception("The initial balance value must be greater than zero.");
         account.setBalance(bankAccount.getBalance());
         return bankAccountRepository.save(account);
     }
@@ -57,14 +57,39 @@ public class BankServiceImpl implements BankService {
     public synchronized void withdraw(String accountNumber, Double amount) throws Exception {
         if(accountNumber != null && !accountNumber.isEmpty()) {
             BankAccount account = findByAccountNumber(accountNumber);
-            if(account.getBalance() >= amount) {
-                account.setBalance(account.getBalance() + amount);
+            if(checkBalanceValueWithAmount(account.getBalance(),amount)) {
+                account.setBalance(account.getBalance() - amount);
                 bankAccountRepository.save(account);
                 transactionLogger.onTransaction(accountNumber, "Withdrawal", amount);
             }else
                 throw new Exception("The Balance is less than amount");
         }else
             throw new Exception("accountNumber is null");
+    }
+
+    @Override
+    @Transactional
+    public synchronized void transfer(String fromAccountNumber, String toAccountNumber, Double amount) throws Exception {
+        if(fromAccountNumber != null && !fromAccountNumber.isEmpty() && toAccountNumber != null && !toAccountNumber.isEmpty()) {
+            BankAccount originAccount = findByAccountNumber(fromAccountNumber);
+            BankAccount destinationAccount = findByAccountNumber(toAccountNumber);
+            if(checkBalanceValueWithAmount(originAccount.getBalance(),amount)) {
+                originAccount.setBalance(originAccount.getBalance() - amount);
+                bankAccountRepository.save(originAccount);
+                transactionLogger.onTransaction(originAccount.getAccountNumber(), "Withdrawal", amount);
+                destinationAccount.setBalance(destinationAccount.getBalance() + amount);
+                bankAccountRepository.save(originAccount);
+                transactionLogger.onTransaction(destinationAccount.getAccountNumber(), "Deposit", amount);
+            }else
+                throw new Exception("The Balance is less than amount");
+        }else
+            throw new Exception("fromAccount And toAccount cannot be null");
+    }
+
+    public Boolean checkBalanceValueWithAmount(Double balance,Double amount) {
+        if(balance > amount)
+            return Boolean.TRUE;
+        return Boolean.FALSE;
     }
 
     public String generateAccountNumber() {
