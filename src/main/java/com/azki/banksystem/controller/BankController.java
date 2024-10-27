@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/banksystem")
 public class BankController {
+    // Dear AZKIVAM friend,
+    // This Controller class is just for test create And display Account API
+    // with postman And it's not completed
 
     @Autowired
     BankService bankService;

@@ -1,6 +1,5 @@
 package com.azki.banksystem.service;
 
-import com.azki.banksystem.log.TransactionObserver;
 import com.azki.banksystem.model.BankAccount;
 
 public interface BankService {
@@ -13,7 +12,7 @@ public interface BankService {
 
     public void withdraw(String accountNumber, Double amount) throws Exception;
 
-    public void transfer(String fromAccountNumber,String toAccountNumber,Double amount) throws Exception;
+    public void transfer(String fromAccountNumber, String toAccountNumber, Double amount) throws Exception;
 
 
 }
