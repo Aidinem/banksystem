@@ -1,4 +1,4 @@
-/*
+
 package com.azki.banksystem.controller;
 
 import com.azki.banksystem.model.BankAccount;
@@ -25,4 +25,4 @@ public class BankController {
             return ResponseEntity.ok(bankAccount);
     }
 }
-*/
+

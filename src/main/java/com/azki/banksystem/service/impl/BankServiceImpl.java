@@ -1,7 +1,7 @@
 package com.azki.banksystem.service.impl;
 
 import com.azki.banksystem.dao.BankAccountRepository;
-import com.azki.banksystem.log.TransactionLogger;
+import com.azki.banksystem.log.TransactionObserver;
 import com.azki.banksystem.model.BankAccount;
 import com.azki.banksystem.service.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +16,17 @@ public class BankServiceImpl implements BankService {
     @Autowired
     BankAccountRepository bankAccountRepository;
     @Autowired
-    TransactionLogger transactionLogger;
+    TransactionObserver transactionObserver;
 
+
+    @Override
+    public BankAccount findByAccountNumber(String accountNumber) throws Exception {
+        BankAccount account = bankAccountRepository.findByAccountNumber(accountNumber);
+        if (account != null && account.getId() > 0)
+            return account;
+        else
+            throw new Exception("Account Not Found With this accountNumber.");
+    }
 
     @Override
     @Transactional
@@ -31,14 +40,7 @@ public class BankServiceImpl implements BankService {
         return bankAccountRepository.save(account);
     }
 
-    @Override
-    public BankAccount findByAccountNumber(String accountNumber) throws Exception {
-        BankAccount account = bankAccountRepository.findByAccountNumber(accountNumber);
-        if (account != null && account.getId() > 0)
-            return account;
-        else
-            throw new Exception("Account Not Found With this accountNumber.");
-    }
+
 
     @Override
     @Transactional
@@ -47,7 +49,7 @@ public class BankServiceImpl implements BankService {
             BankAccount account = findByAccountNumber(accountNumber);
             account.setBalance(account.getBalance() + amount);
             bankAccountRepository.save(account);
-            transactionLogger.onTransaction(accountNumber, "Deposit", amount);
+            transactionObserver.notifyObservers(accountNumber,"Deposit", amount);
         } else
             throw new Exception("accountNumber is null");
     }
@@ -60,7 +62,7 @@ public class BankServiceImpl implements BankService {
             if(checkBalanceValueWithAmount(account.getBalance(),amount)) {
                 account.setBalance(account.getBalance() - amount);
                 bankAccountRepository.save(account);
-                transactionLogger.onTransaction(accountNumber, "Withdrawal", amount);
+                transactionObserver.notifyObservers(accountNumber,"Withdrawal", amount);
             }else
                 throw new Exception("The Balance is less than amount");
         }else
@@ -73,15 +75,8 @@ public class BankServiceImpl implements BankService {
         if(fromAccountNumber != null && !fromAccountNumber.isEmpty() && toAccountNumber != null && !toAccountNumber.isEmpty()) {
             BankAccount originAccount = findByAccountNumber(fromAccountNumber);
             BankAccount destinationAccount = findByAccountNumber(toAccountNumber);
-            if(checkBalanceValueWithAmount(originAccount.getBalance(),amount)) {
-                originAccount.setBalance(originAccount.getBalance() - amount);
-                bankAccountRepository.save(originAccount);
-                transactionLogger.onTransaction(originAccount.getAccountNumber(), "Withdrawal", amount);
-                destinationAccount.setBalance(destinationAccount.getBalance() + amount);
-                bankAccountRepository.save(originAccount);
-                transactionLogger.onTransaction(destinationAccount.getAccountNumber(), "Deposit", amount);
-            }else
-                throw new Exception("The Balance is less than amount");
+            withdraw(originAccount.getAccountNumber(),amount);
+            deposit(destinationAccount.getAccountNumber(),amount);
         }else
             throw new Exception("fromAccount And toAccount cannot be null");
     }

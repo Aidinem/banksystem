@@ -1,5 +1,7 @@
 package com.azki.banksystem.controller;
 
+import com.azki.banksystem.log.TransactionLogger;
+import com.azki.banksystem.log.TransactionObserver;
 import com.azki.banksystem.model.BankAccount;
 import com.azki.banksystem.service.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +17,16 @@ public class BankSystemConsoleUI implements CommandLineRunner {
 
     @Autowired
     private BankService bankService;
+    @Autowired
+    private TransactionObserver transactionObserver;
     ExecutorService executorService = Executors.newFixedThreadPool(10);
     Scanner scanner = new Scanner(System.in);
 
 
+
     @Override
     public void run(String... args) throws Exception {
+        transactionObserver.addObserver(new TransactionLogger());
         while (true) {
             displayBankSystemOptions();
             Integer selectedOption = scanner.nextInt();
