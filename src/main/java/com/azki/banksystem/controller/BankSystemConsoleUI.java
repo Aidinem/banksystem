@@ -78,6 +78,8 @@ public class BankSystemConsoleUI implements CommandLineRunner {
             }
         });
 
+        executorService.shutdown();
+
     }
 
     private void deposit() {
@@ -95,6 +97,8 @@ public class BankSystemConsoleUI implements CommandLineRunner {
                 System.out.println(e.getMessage());
             }
         });
+
+        executorService.shutdown();
     }
 
     private void withdraw() {
@@ -112,6 +116,8 @@ public class BankSystemConsoleUI implements CommandLineRunner {
                 System.out.println(e.getMessage());
             }
         });
+
+        executorService.shutdown();
     }
 
     private void transfer() {
@@ -131,6 +137,8 @@ public class BankSystemConsoleUI implements CommandLineRunner {
                 System.out.println(e.getMessage());
             }
         });
+
+        executorService.shutdown();
     }
 
     private void displayAccountIfo() throws Exception {
